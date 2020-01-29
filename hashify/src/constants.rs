@@ -1,0 +1,23 @@
+//Crypto hash algorithms
+pub const MD5: &str = "md5";
+pub const SHA1: &str = "sha1";
+pub const SHA2_224: &str = "sha2-224";
+pub const SHA2_256: &str = "sha2-256";
+pub const SHA2_384: &str = "sha2-384";
+pub const SHA2_512: &str = "sha2-512";
+pub const SHA2_512_T224: &str = "sha2-512-t224";
+pub const SHA2_512_T256: &str = "sha2-512-t256";
+pub const SHA3_224: &str = "sha3-224";
+pub const SHA3_256: &str = "sha3-256";
+pub const SHA3_384: &str = "sha3-384";
+pub const SHA3_512: &str = "sha3-512";
+pub const BLAKE2_256: &str = "blake2-256";
+pub const BLAKE2_384: &str = "blake2-384";
+pub const BLAKE2_512: &str = "blake2-512";
+pub const BLAKE3_256: &str = "blake3-256";
+pub const BLAKE3_384: &str = "blake3-384";
+pub const BLAKE3_512: &str = "blake3-512";
+pub const WHIRLPOOL: &str = "whirpool";
+pub const RIPEMD128: &str = "ripemd128";
+pub const RIPEMD160: &str = "ripemd160";
+pub const RIPEMD320: &str = "ripemd320";

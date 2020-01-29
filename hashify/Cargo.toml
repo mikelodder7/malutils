@@ -1,0 +1,21 @@
+[package]
+name = "hashify"
+version = "0.1.0"
+authors = ["Michael Lodder <redmike7@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+blake2 = "0.8"
+blake3 = "0.1"
+clap = "2.33"
+colored = "1.8"
+md-5 = "0.8"
+ripemd128 = "0.1"
+ripemd160 = "0.8"
+ripemd320 = "0.8"
+sha-1 = "0.8"
+sha2 = "0.8"
+sha3 = "0.8"
+stringreader = "0.1"
+serious = { version = "0.1", path = "../serious" }
+whirlpool = "0.8"

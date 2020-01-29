@@ -1,0 +1,26 @@
+[package]
+name = "serious"
+version = "0.1.0"
+authors = ["Michael Lodder <redmike7@gmail.com>"]
+edition = "2018"
+
+[lib]
+name = "serious"
+path = "src/lib.rs"
+
+[[bin]]
+name = "serious"
+path = "src/main.rs"
+
+[dependencies]
+clap = "2.33"
+base-x = "0.2.6"
+base64-url = "1.1.12"
+bs58 = "0.3.0"
+hex = "0.4.0"
+num-bigint = "0.2.3"
+num-traits = "0.2.8"
+stringreader = "0.1"
+
+[dev-dependencies]
+rand = "0.7.2"

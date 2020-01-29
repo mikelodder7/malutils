@@ -1,0 +1,15 @@
+[package]
+name = "randr"
+version = "0.1.0"
+authors = ["Michael Lodder <redmike7@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+arrayref = "0.3.5"
+atty = "0.2.13"
+clap = "2.33.0"
+serious = { version = "0.1", path = "../serious" }
+rand = "0.7.2"
+rand_chacha = "0.2.1"
+rpassword = "4.0.1"
+sha2 = "0.8.0"
