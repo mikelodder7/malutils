@@ -14,9 +14,13 @@ pub enum CommandLineArgs {
 }
 
 pub fn parse_cmd_line() -> Result<BTreeMap<&'static str, CommandLineArgs>, String> {
-    let encodings = Code::values().iter().map(|e| e.short_name()).collect::<Vec<String>>();
-    let enc_ref = encodings.iter().map(|s| s.as_str()).collect::<Vec<&str>>();
-    let lowhex = Code::LowHex.short_name();
+    let encodings = vec![
+        Code::Blob.to_string(), Code::Binary.to_string(), Code::Base10.to_string(),
+        Code::Base58.to_string(), Code::Base62.to_string(), Code::Base64.to_string(),
+        Code::Base64Url.to_string(), Code::BitCoin.to_string(), Code::Flickr.to_string(),
+        Code::LowHex.to_string(), Code::Monero.to_string(), Code::Ripple.to_string()
+    ];
+    let enc_ref = encodings.iter().map(|e| e.as_str()).collect::<Vec<&str>>();
     let matches = App::new("randr")
         .version("0.1")
         .author("Michael Lodder")
@@ -38,7 +42,7 @@ pub fn parse_cmd_line() -> Result<BTreeMap<&'static str, CommandLineArgs>, Strin
                 .takes_value(true)
                 .possible_values(enc_ref.as_slice())
                 .value_delimiter(",")
-                .default_value(lowhex.as_str()),
+                .default_value("hex"),
         )
         .arg(
             Arg::with_name("seed")
@@ -65,8 +69,8 @@ pub fn parse_cmd_line() -> Result<BTreeMap<&'static str, CommandLineArgs>, Strin
         }
     }
 
-    let encoding = matches.value_of("encoding").unwrap_or(lowhex.as_str());
-    args.insert("encoding", CommandLineArgs::Encoding(Code::from_short_name(encoding).unwrap()));
+    let encoding = matches.value_of("encoding").unwrap_or("hex");
+    args.insert("encoding", CommandLineArgs::Encoding(Code::parse(encoding).unwrap()));
 
     if matches.is_present("seed") {
         let temp;
