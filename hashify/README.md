@@ -81,6 +81,8 @@ blake2-256    big-endian    hex    - fail
 blake2-256    little-endian hex    - fail
 blake2-256    big-endian    base64 - fail
 blake2-256    little-endian base64 - fail
+blake3-256    big-endian    base64 - fail
+blake3-256    little-endian base64 - fail
 sha3-256      big-endian    hex    - fail
 sha3-256      little-endian hex    - fail
 sha3-256      big-endian    base64 - fail
@@ -152,6 +154,9 @@ The following hash algorithm types **-t, --type** are currently supported:
 - blake2-256
 - blake2-384
 - blake2-512
+- blake3-256
+- blake3-384
+- blake3-512
 - whirpool
 - ripemd128
 - ripemd160
