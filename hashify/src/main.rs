@@ -11,7 +11,6 @@ use clap::{App, Arg, ArgMatches, SubCommand};
 use colored::*;
 use serious::Encoding as Code;
 use sha1::Sha1;
-use sha2::digest::DynDigest;
 use sha2::Digest;
 use std::collections::HashMap;
 use std::fs::File;
@@ -23,6 +22,8 @@ use stringreader::StringReader;
 use blake2::Blake2b as Blake2_512;
 #[cfg(target_pointer_width = "32")]
 use blake2::Blake2s as Blake2_512;
+use digest::typenum::U64;
+use digest::FixedOutputReset;
 
 mod blake2t;
 use blake2t::{Blake2_256, Blake2_384};
@@ -64,7 +65,7 @@ fn main() {
         .collect::<Vec<String>>();
     let encs = encodings.iter().map(|e| e.as_str()).collect::<Vec<&str>>();
     let default_enc = Code::LowHex.to_string();
-    let create_default_type = vec!["sha3-256", "sha2-256", "sha2-512-t256", "blake2-256"].join(",");
+    let create_default_type = ["sha3-256", "sha2-256", "sha2-512-t256", "blake2-256"].join(",");
     let matches = App::new("Hashify")
         .version("0.1")
         .author("Michael Lodder")
@@ -163,18 +164,18 @@ fn main() {
 
 fn create(matches: &ArgMatches) {
     let hash_types: Vec<&str> = matches.values_of("type").unwrap().collect();
-    let out_hash = get_hashes_from_input(&matches, hash_types);
+    let out_hash = get_hashes_from_input(matches, hash_types);
     let label_width = out_hash
         .iter()
-        .fold(0usize, |a, (label, _)| ::std::cmp::max(a, label.len()));
+        .fold(0usize, |a, (label, _)| std::cmp::max(a, label.len()));
     let byte_width = matches
         .values_of("byteorder")
         .unwrap()
-        .fold(0usize, |a, s| ::std::cmp::max(a, s.len()));
+        .fold(0usize, |a, s| std::cmp::max(a, s.len()));
     let enc_width = matches
         .values_of("encoding")
         .unwrap()
-        .fold(0usize, |a, s| ::std::cmp::max(a, s.len()));
+        .fold(0usize, |a, s| std::cmp::max(a, s.len()));
 
     for (label, hash) in out_hash {
         let l = name_color(&label);
@@ -201,10 +202,10 @@ fn create(matches: &ArgMatches) {
                 match enc {
                     Code::Blob => {
                         print!(
-                            "{:label_width$} {:byte_width$}-endian {:enc_width$} - {}",
-                            l,
-                            bo,
-                            "blob",
+                            "{l:label_width$} {bo:byte_width$}-endian {enc:enc_width$} - blob",
+                            l = l,
+                            bo = bo,
+                            enc = "",
                             label_width = label_width,
                             byte_width = byte_width,
                             enc_width = enc_width
@@ -327,14 +328,14 @@ fn verify(matches: &ArgMatches) {
             if big_endian {
                 let l = name_color(name);
                 if output == cksum {
-                    name_width = ::std::cmp::max(name_width, name.len());
-                    enc_width = ::std::cmp::max(enc_width, encoding.len());
-                    byte_width = ::std::cmp::max(byte_width, 10);
+                    name_width = std::cmp::max(name_width, name.len());
+                    enc_width = std::cmp::max(enc_width, encoding.len());
+                    byte_width = std::cmp::max(byte_width, 10);
                     trials.insert(0, (l, "big-endian", encoding, "pass".green()));
                 } else {
-                    name_width = ::std::cmp::max(name_width, name.len());
-                    enc_width = ::std::cmp::max(enc_width, encoding.len());
-                    byte_width = ::std::cmp::max(byte_width, 10);
+                    name_width = std::cmp::max(name_width, name.len());
+                    enc_width = std::cmp::max(enc_width, encoding.len());
+                    byte_width = std::cmp::max(byte_width, 10);
                     trials.push((l, "big-endian", encoding, "fail".red()));
                 }
             }
@@ -343,14 +344,14 @@ fn verify(matches: &ArgMatches) {
                 let mut temp = output.to_vec();
                 temp.reverse();
                 if temp == *cksum {
-                    name_width = ::std::cmp::max(name_width, name.len());
-                    enc_width = ::std::cmp::max(enc_width, encoding.len());
-                    byte_width = ::std::cmp::max(byte_width, 13);
+                    name_width = std::cmp::max(name_width, name.len());
+                    enc_width = std::cmp::max(enc_width, encoding.len());
+                    byte_width = std::cmp::max(byte_width, 13);
                     trials.insert(0, (l, "little-endian", encoding, "pass".green()));
                 } else {
-                    name_width = ::std::cmp::max(name_width, name.len());
-                    enc_width = ::std::cmp::max(enc_width, encoding.len());
-                    byte_width = ::std::cmp::max(byte_width, 13);
+                    name_width = std::cmp::max(name_width, name.len());
+                    enc_width = std::cmp::max(enc_width, encoding.len());
+                    byte_width = std::cmp::max(byte_width, 13);
                     trials.push((l, "little-endian", encoding, "fail".red()));
                 }
             }
@@ -465,7 +466,7 @@ fn hash_stream<R: Read>(f: &mut R, hash_types: Vec<&str>) -> Vec<(String, Vec<u8
 
     let mut buffer = [0u8; 65536];
 
-    let mut halg: Vec<Box<dyn DynDigest>> = Vec::new();
+    let mut halg: Vec<Box<dyn FixedDigest>> = Vec::with_capacity(hash_types.len());
     for hash in &hash_types {
         match *hash {
             SHA3_224 => halg.push(Box::new(sha3::Sha3_224::new())),
@@ -474,8 +475,8 @@ fn hash_stream<R: Read>(f: &mut R, hash_types: Vec<&str>) -> Vec<(String, Vec<u8
             SHA3_512 => halg.push(Box::new(sha3::Sha3_512::new())),
             SHA2_224 => halg.push(Box::new(sha2::Sha224::new())),
             SHA2_256 => halg.push(Box::new(sha2::Sha256::new())),
-            SHA2_512_T224 => halg.push(Box::new(sha2::Sha512Trunc224::new())),
-            SHA2_512_T256 => halg.push(Box::new(sha2::Sha512Trunc256::new())),
+            SHA2_512_T224 => halg.push(Box::new(sha2::Sha512_224::new())),
+            SHA2_512_T256 => halg.push(Box::new(sha2::Sha512_256::new())),
             SHA2_384 => halg.push(Box::new(sha2::Sha384::new())),
             SHA2_512 => halg.push(Box::new(sha2::Sha512::new())),
             SHA1 => halg.push(Box::new(Sha1::new())),
@@ -486,9 +487,9 @@ fn hash_stream<R: Read>(f: &mut R, hash_types: Vec<&str>) -> Vec<(String, Vec<u8
             BLAKE3_384 => halg.push(Box::new(Blake3_384::new())),
             BLAKE3_512 => halg.push(Box::new(Blake3_512::new())),
             WHIRLPOOL => halg.push(Box::new(whirlpool::Whirlpool::new())),
-            RIPEMD320 => halg.push(Box::new(ripemd320::Ripemd320::new())),
-            RIPEMD160 => halg.push(Box::new(ripemd160::Ripemd160::new())),
-            RIPEMD128 => halg.push(Box::new(ripemd128::Ripemd128::new())),
+            RIPEMD320 => halg.push(Box::new(ripemd::Ripemd320::new())),
+            RIPEMD160 => halg.push(Box::new(ripemd::Ripemd160::new())),
+            RIPEMD128 => halg.push(Box::new(ripemd::Ripemd128::new())),
             MD5 => halg.push(Box::new(md5::Md5::new())),
             e => quit(format!("Unrecognized checksum \"{}]\"", e)),
         }
@@ -502,19 +503,16 @@ fn hash_stream<R: Read>(f: &mut R, hash_types: Vec<&str>) -> Vec<(String, Vec<u8
             break;
         }
 
-        for i in 0..halg.len() {
-            let mut hash = halg[i].clone();
-            hash.input(&buffer[..n]);
-            halg[i] = hash;
+        for hash in halg.iter_mut() {
+            hash.update(&buffer[..n]);
         }
 
         read = f.read(&mut buffer);
     }
 
-    for i in 0..halg.len() {
-        let mut hash = halg[i].clone();
-        let digest = hash.result_reset().to_vec();
-        out_hash.push((hash_types[i].to_string(), digest))
+    for (hash, hash_type) in halg.iter_mut().zip(hash_types.iter()) {
+        let digest = hash.finalize_reset();
+        out_hash.push((hash_type.to_string(), digest))
     }
     out_hash
 }
@@ -545,3 +543,64 @@ fn quit(final_message: String) {
     println!("{}", final_message);
     std::process::exit(1);
 }
+
+trait FixedDigest {
+    fn update(&mut self, data: &[u8]);
+    fn finalize_reset(&mut self) -> Vec<u8>;
+}
+
+macro_rules! impl_fixed_digest {
+    ($($name:ident),+) => {
+        $(
+        impl FixedDigest for $name {
+            fn update(&mut self, data: &[u8]) {
+                <Self as digest::Update>::update(self, data);
+            }
+
+            fn finalize_reset(&mut self) -> Vec<u8> {
+                <Self as FixedOutputReset>::finalize_fixed_reset(self).to_vec()
+            }
+        }
+        )+
+    };
+    ($($name:path),+) => {
+        $(
+        impl FixedDigest for $name {
+            fn update(&mut self, data: &[u8]) {
+                <Self as digest::Update>::update(self, data);
+            }
+
+            fn finalize_reset(&mut self) -> Vec<u8> {
+                <Self as FixedOutputReset>::finalize_fixed_reset(self).to_vec()
+            }
+        }
+        )+
+    };
+}
+
+impl_fixed_digest!(
+    sha2::Sha224,
+    sha2::Sha256,
+    sha2::Sha384,
+    sha2::Sha512,
+    sha3::Sha3_224,
+    sha3::Sha3_256,
+    sha3::Sha3_384,
+    sha3::Sha3_512,
+    sha2::Sha512_224,
+    sha2::Sha512_256,
+    whirlpool::Whirlpool,
+    ripemd::Ripemd128,
+    ripemd::Ripemd160,
+    ripemd::Ripemd320,
+    md5::Md5
+);
+impl_fixed_digest!(
+    Blake2_256,
+    Blake2_384,
+    Blake2_512<U64>,
+    Blake3_256,
+    Blake3_384,
+    Blake3_512,
+    Sha1
+);
