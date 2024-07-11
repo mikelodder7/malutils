@@ -15,10 +15,18 @@ pub enum CommandLineArgs {
 
 pub fn parse_cmd_line() -> Result<BTreeMap<&'static str, CommandLineArgs>, String> {
     let encodings = vec![
-        Code::Blob.to_string(), Code::Binary.to_string(), Code::Base10.to_string(),
-        Code::Base58.to_string(), Code::Base62.to_string(), Code::Base64.to_string(),
-        Code::Base64Url.to_string(), Code::BitCoin.to_string(), Code::Flickr.to_string(),
-        Code::LowHex.to_string(), Code::Monero.to_string(), Code::Ripple.to_string()
+        Code::Blob.to_string(),
+        Code::Binary.to_string(),
+        Code::Base10.to_string(),
+        Code::Base58.to_string(),
+        Code::Base62.to_string(),
+        Code::Base64.to_string(),
+        Code::Base64Url.to_string(),
+        Code::BitCoin.to_string(),
+        Code::Flickr.to_string(),
+        Code::LowHex.to_string(),
+        Code::Monero.to_string(),
+        Code::Ripple.to_string(),
     ];
     let enc_ref = encodings.iter().map(|e| e.as_str()).collect::<Vec<&str>>();
     let matches = App::new("randr")
@@ -70,7 +78,10 @@ pub fn parse_cmd_line() -> Result<BTreeMap<&'static str, CommandLineArgs>, Strin
     }
 
     let encoding = matches.value_of("encoding").unwrap_or("hex");
-    args.insert("encoding", CommandLineArgs::Encoding(Code::parse(encoding).unwrap()));
+    args.insert(
+        "encoding",
+        CommandLineArgs::Encoding(Code::parse(encoding).unwrap()),
+    );
 
     if matches.is_present("seed") {
         let temp;
@@ -90,7 +101,7 @@ pub fn parse_cmd_line() -> Result<BTreeMap<&'static str, CommandLineArgs>, Strin
             },
             None => {
                 if atty::is(atty::Stream::Stdin) {
-                    temp = rpassword::read_password_from_tty(Some("Enter Seed: "))
+                    temp = rpassword::prompt_password("Enter Seed: ")
                         .unwrap()
                         .as_bytes()
                         .to_vec();

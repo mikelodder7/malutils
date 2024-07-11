@@ -16,18 +16,38 @@ use stringreader::StringReader;
 
 fn main() {
     let inencodings = vec![
-        Blob.to_string(), Binary.to_string(), Base10.to_string(),
-        Base58.to_string(), Base62.to_string(), Base64.to_string(),
-        Base64Url.to_string(), BitCoin.to_string(), Flickr.to_string(),
-        LowHex.to_string(), Monero.to_string(), Ripple.to_string()
+        Blob.to_string(),
+        Binary.to_string(),
+        Base10.to_string(),
+        Base58.to_string(),
+        Base62.to_string(),
+        Base64.to_string(),
+        Base64Url.to_string(),
+        BitCoin.to_string(),
+        Flickr.to_string(),
+        LowHex.to_string(),
+        Monero.to_string(),
+        Ripple.to_string(),
     ];
-    let inencs = inencodings.iter().map(|e| e.as_str()).collect::<Vec<&str>>();
+    let inencs = inencodings
+        .iter()
+        .map(|e| e.as_str())
+        .collect::<Vec<&str>>();
 
     let outencs = vec![
-        "blob", "binary", "base10",
-        "base58", "base62", "base64",
-        "base64url", "bitcoin", "flickr",
-        "lowhex", "uphex", "monero", "ripple"
+        "blob",
+        "binary",
+        "base10",
+        "base58",
+        "base62",
+        "base64",
+        "base64url",
+        "bitcoin",
+        "flickr",
+        "lowhex",
+        "uphex",
+        "monero",
+        "ripple",
     ];
 
     let matches = App::new("Serious")

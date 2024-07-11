@@ -37,7 +37,7 @@ use std::fmt::Display;
 #[derive(Debug, Clone)]
 pub struct Encoder<I: AsRef<[u8]>> {
     input: I,
-    encoding: Encoding
+    encoding: Encoding,
 }
 
 impl<I: AsRef<[u8]>> Encoder<I> {
@@ -53,17 +53,17 @@ impl<I: AsRef<[u8]>> Encoder<I> {
             Base10 => BigUint::from_bytes_be(s).to_str_radix(10),
             Base58 | BitCoin => bs58::encode(s).into_string(),
             Base62 => base_x::encode(BASE62, s),
-            Base64 => base64_url::base64::encode(s),
+            Base64 => base64_url::encode(s),
             Base64Url => base64_url::encode(s),
             Flickr => bs58::encode(s)
-                .with_alphabet(bs58::alphabet::FLICKR)
+                .with_alphabet(bs58::Alphabet::FLICKR)
                 .into_string(),
             LowHex => hex::encode(s),
             Monero => bs58::encode(s)
-                .with_alphabet(bs58::alphabet::MONERO)
+                .with_alphabet(bs58::Alphabet::MONERO)
                 .into_string(),
             Ripple => bs58::encode(s)
-                .with_alphabet(bs58::alphabet::RIPPLE)
+                .with_alphabet(bs58::Alphabet::RIPPLE)
                 .into_string(),
             UpHex => hex::encode_upper(s),
         }
@@ -72,7 +72,7 @@ impl<I: AsRef<[u8]>> Encoder<I> {
     pub fn into_vec(self) -> Vec<u8> {
         match self.encoding {
             Blob => self.input.as_ref().to_vec(),
-            _ => self.into_string().into_bytes()
+            _ => self.into_string().into_bytes(),
         }
     }
 }
@@ -101,7 +101,7 @@ impl Encoding {
         let s = s.as_ref();
         match s {
             "blob" => Ok(Blob),
-            "bin" | "binary" =>  Ok(Binary),
+            "bin" | "binary" => Ok(Binary),
             "bs10" | "base10" => Ok(Base10),
             "bs58" | "base58" => Ok(Base58),
             "btc" | "bitcoin" => Ok(BitCoin),
@@ -112,8 +112,8 @@ impl Encoding {
             "lowhex" | "hex" => Ok(LowHex),
             "xmr" | "monero" => Ok(Monero),
             "xrp" | "ripple" => Ok(Ripple),
-            "uhx" | "uphex" =>  Ok(UpHex),
-            _ => Err(format!("Unknown encoding: {}", s))
+            "uhx" | "uphex" => Ok(UpHex),
+            _ => Err(format!("Unknown encoding: {}", s)),
         }
     }
 
@@ -131,26 +131,29 @@ impl Encoding {
             },
             Base58 | BitCoin => bs58::decode(s).into_vec().map_err(|e| e.to_string()),
             Base62 => base_x::decode(BASE62, s).map_err(|e| e.to_string()),
-            Base64 => base64_url::base64::decode(s).map_err(|e| e.to_string()),
+            Base64 => base64_url::decode(s).map_err(|e| e.to_string()),
             Base64Url => base64_url::decode(s).map_err(|e| e.to_string()),
             Flickr => bs58::decode(s)
-                .with_alphabet(bs58::alphabet::FLICKR)
+                .with_alphabet(bs58::Alphabet::FLICKR)
                 .into_vec()
                 .map_err(|e| e.to_string()),
             LowHex | UpHex => hex::decode(s).map_err(|e| e.to_string()),
             Monero => bs58::decode(s)
-                .with_alphabet(bs58::alphabet::MONERO)
+                .with_alphabet(bs58::Alphabet::MONERO)
                 .into_vec()
                 .map_err(|e| e.to_string()),
             Ripple => bs58::decode(s)
-                .with_alphabet(bs58::alphabet::RIPPLE)
+                .with_alphabet(bs58::Alphabet::RIPPLE)
                 .into_vec()
                 .map_err(|e| e.to_string()),
         }
     }
 
     pub fn encode<T: AsRef<[u8]>>(s: T, tgt: Self) -> Encoder<T> {
-        Encoder { input: s, encoding: tgt }
+        Encoder {
+            input: s,
+            encoding: tgt,
+        }
     }
 
     pub fn recode<T: AsRef<str>>(s: T, src: Self, tgt: Self) -> Result<String, String> {
@@ -164,8 +167,8 @@ impl Encoding {
 
     pub fn values() -> Vec<Self> {
         vec![
-            Blob, Binary, Base10, Base58, Base62, Base64, Base64Url, BitCoin, Flickr, LowHex, Monero,
-            Ripple, UpHex,
+            Blob, Binary, Base10, Base58, Base62, Base64, Base64Url, BitCoin, Flickr, LowHex,
+            Monero, Ripple, UpHex,
         ]
     }
 }

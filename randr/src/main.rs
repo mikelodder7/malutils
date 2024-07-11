@@ -10,10 +10,10 @@
 mod options;
 
 use crate::options::CommandLineArgs;
-use serious::Encoding as Code;
 use rand::prelude::*;
 use rand::rngs::OsRng;
 use rand_chacha::ChaChaRng;
+use serious::Encoding as Code;
 use std::io::{self, Write};
 
 fn main() {
